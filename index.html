@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>音乐图片播放器</title>
+    <title>随机图片音乐播放器</title>
     <style>
         * {
             margin: 0;
@@ -68,7 +68,7 @@
             object-fit: contain;
         }
         
-        。pulse {
+        .pulse {
             animation: pulse 2s infinite;
         }
         
@@ -91,7 +91,7 @@
     
     <!-- 图片容器 -->
     <div id="imageContainer">
-        <img id="displayedImage" alt="Emma图片" crossorigin="anonymous">
+        <img id="displayedImage" alt="随机图片" crossorigin="anonymous">
     </div>
 
     <script>
@@ -107,19 +107,27 @@
         audio.volume = 1.0; // 最大音量
         audio.loop = true; // 循环播放
         
+        // 图片总数
+        const totalPhotos = 13;
+        
+        // 生成随机图片路径
+        function getRandomPhotoPath() {
+            // 生成1到13之间的随机整数
+            const randomNumber = Math.floor(Math.random() * totalPhotos) + 1;
+            // 返回图片路径
+            return `resource/photo/photo${randomNumber}.png`;
+        }
+        
         // 初始化函数
         function init() {
-            // 加载图片资源
-            displayedImage.src = 'resource/Emma.png';
-            
             // 设置音频资源
             audio.src = 'resource/music.mp3';
             
-            // 图片加载完成后的回调
-            displayedImage.onload = function() {
-                console.log('图片加载成功');
+            // 音频加载失败
+            audio.onerror = function() {
+                console.error('音频加载失败: resource/music.mp3');
+                // 即使音频加载失败，我们也不显示错误信息
             };
-
         }
         
         // 启动播放函数
@@ -127,12 +135,33 @@
             // 隐藏按钮
             startButton.style.display = 'none';
             
-            // 显示图片
+            // 显示图片容器
             imageContainer.style.display = 'flex';
+            
+            // 随机选择一张图片
+            const randomPhotoPath = getRandomPhotoPath();
+            displayedImage.src = randomPhotoPath;
+            
+            // 图片加载完成
+            displayedImage.onload = function() {
+                console.log('图片加载成功:', randomPhotoPath);
+            };
+            
+            // 图片加载失败
+            displayedImage.onerror = function() {
+                console.error('图片加载失败:', randomPhotoPath);
+                // 即使图片加载失败，我们也不显示错误信息
+            };
             
             // 尝试播放音乐
             const playPromise = audio.play();
             
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                    console.error("播放错误:", error);
+                    // 即使播放失败，我们也不显示错误信息，只显示图片
+                });
+            }
         }
         
         // 页面加载完成后初始化
